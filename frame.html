@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+    <style>
+      :root {
+        --R: 5;
+        --RX: 45;
+        --RZ: 45;
+        --ARM: 30;
+        --IMGW: 30;
+      }
+      @property --d {
+        syntax: "<integer>";
+        inherits: true;
+        initial-value: 0;
+      }
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      body {
+        height: 100vh;
+        overflow: hidden;
+      }
+      .sence * {
+        transform-style: preserve-3d;
+      }
+      .sence {
+        height: 100vh;
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        perspective: 800px;
+        perspective-origin: center bottom;
+        .pic {
+          width: calc(var(--IMGW) * 1rem);
+          aspect-ratio: 3/4;
+          position: absolute;
+          border: 1px solid blue;
+          z-index: 10;
+          left: calc(50% - var(--IMGW) * 1rem / 2);
+          bottom: 30%;
+          background: var(--URL) center / cover no-repeat;
+          filter: brightness(1.5) contrast(1.2);
+          z-index: 10;
+          mask: radial-gradient(closest-side, white, transparent);
+          &::before {
+            content: "";
+            display: block;
+            position: absolute;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+
+            background: repeating-conic-gradient(
+                white -45deg,
+                white 45deg,
+                transparent 0,
+                transparent 135deg
+              )
+              center / 2px 2px repeat;
+          }
+        }
+        .base {
+          width: calc(var(--R) * 1rem);
+          aspect-ratio: 1;
+          border-radius: 50%;
+          position: absolute;
+          left: calc(50% - var(--R) * 1rem / 2);
+          bottom: 20%;
+          background-color: gray;
+          border: 1px solid black;
+          transform: rotateX(calc(var(--RX) * 1deg))
+            rotateZ(calc(var(--RZ) * 1deg));
+          &::after {
+            content: "";
+            width: 100%;
+            height: 3rem;
+            display: block;
+            position: relative;
+            background: linear-gradient(to right, gray, white 30%, gray);
+            left: 0;
+            top: 0;
+            border-radius: 0 0 50% 50%;
+            transform: rotateZ(calc(var(--RZ) * -1deg))
+              rotateX(calc(var(--RX) * -1deg)) translate3d(-14%, 2rem, 0);
+          }
+          .center {
+            border-radius: 50%;
+            width: calc(var(--ARM) * 1rem);
+            height: calc(var(--ARM) * 1rem);
+            background-color: red;
+            top: calc(50% - var(--ARM) / 2 * 1rem);
+            left: calc(50% - var(--ARM) / 2 * 1rem);
+            position: absolute;
+
+            background: conic-gradient(
+              at center center in hsl longer hue,
+              red,
+              red
+            );
+            mask: repeating-conic-gradient(
+              at 50% 50%,
+              white calc(var(--d) * 1deg),
+              white calc((var(--d) + 1) * 1deg),
+              transparent calc((var(--d) + 40) * 1deg),
+              transparent calc((var(--d) + 90) * 1deg)
+            );
+            animation: rot 1s linear infinite;
+
+            .arm {
+              width: calc(var(--ARM) * 1rem);
+              position: absolute;
+              height: 1rem;
+              left: calc(50% - var(--ARM) * 1rem / 2);
+              top: calc(50% - 0.5rem);
+              border-radius: 0.5rem;
+
+              background-color: white;
+              transform: translateZ(5rem);
+              animation: rotarm 1s linear infinite;
+              &:nth-child(2) {
+                transform: rotate(90deg);
+              }
+            }
+          }
+        }
+      }
+      canvas {
+        position: absolute;
+        width: 30rem;
+        aspect-ratio: 1;
+        top: calc(50% - 15rem);
+        left: calc(50% - 15rem);
+      }
+      canvas:nth-child(2) {
+        transform: translateZ(5rem);
+        animation: aniH 0.6s ease-in infinite;
+      }
+      canvas:nth-child(3) {
+        transform: translateZ(6rem) scale(0.7);
+        animation: aniV 0.4s ease-in infinite -0.4s;
+      }
+      canvas:nth-child(4) {
+        transform: translateZ(8rem) scale(0.6);
+        animation: aniV 0.8s ease-in infinite -0.8s;
+      }
+      canvas:nth-child(5) {
+        transform: translateZ(10rem) scale(0.5);
+        animation: aniV 1.6s ease-in infinite -1.6s;
+      }
+      canvas:nth-child(6) {
+        transform: translateZ(12rem) scale(0.4);
+        animation: aniV 2s ease-in infinite -2s;
+      }
+
+      @keyframes toScene {
+        from {
+          opacity: 0;
+          bottom: 50%;
+          transform: rotateX(0deg) rotateZ(0deg);
+        }
+      }
+      @keyframes rot {
+        to {
+          --d: -360;
+        }
+      }
+      @keyframes rotarm {
+        to {
+          transform: translateZ(5rem) rotate(-1turn);
+        }
+      }
+      @keyframes aniH {
+        to {
+          transform: translateZ(20rem) scale(1.5);
+          opacity: 0;
+        }
+      }
+
+      @keyframes aniV {
+        to {
+          transform: translateZ(100vh) scale(0);
+          opacity: 0;
+        }
+      }
+    </style>
+    <script>
+      const { sin, cos, tan, PI } = Math;
+      const P2D = new Path2D("M 0 -10 L -10 10 H 10 L 0 -10");
+
+      let t = Date.now();
+      const C = "gold";
+      onload = function () {
+        const imgName = top?.document.body.querySelector("iframe")?.dataset.gif;
+        if (imgName)
+          document.styleSheets[0].cssRules[0].style.setProperty(
+            "--URL",
+            `url(./images/${imgName}.gif)`
+          );
+        const cans = document.querySelectorAll("canvas");
+        const svg = document.createElementNS(
+          "http://www.w3.org/2000/svg",
+          "svg"
+        );
+
+        let Ad = 0;
+        let Ad2 = 0;
+        const arc = [0, 10, 30, 50];
+        cans.forEach((can) => {
+          const ctx = can.getContext("2d");
+
+          function drawCir(w, h) {
+            const R = w / 2;
+
+            for (var i = 0; i < arc.length; i++) {
+              ctx.beginPath();
+              ctx.arc(R, R, R - arc[i], 0, PI * 2);
+              ctx.stroke();
+            }
+            ctx.save();
+            ctx.translate(R, R);
+            ctx.rotate(Ad);
+
+            for (let i = 0; i < 72; i++) {
+              ctx.beginPath();
+              ctx.moveTo(R - 10, 0);
+              ctx.lineTo(R, 0);
+              ctx.stroke();
+              if (i % 9 == 0) {
+                ctx.save();
+                ctx.translate(R - 40, 0);
+                ctx.rotate(PI / 2);
+                ctx.fillText(i, 0, 0);
+                ctx.restore();
+              }
+              ctx.rotate(PI / 36);
+            }
+            Ad += 0.1;
+            Ad %= PI * 2;
+            ctx.restore();
+          }
+
+          function drawArr(w, h) {
+            const R = w / 2;
+            ctx.save();
+            ctx.translate(R, R);
+            ctx.rotate(-Ad2);
+            if (Date.now() - t > 200) {
+              t = Date.now();
+
+              Ad2 += 0.1;
+              Ad2 %= PI * 2;
+            }
+            for (let i = 0; i < 8; i++) {
+              const p2d = new Path2D();
+              let matrix = svg.createSVGMatrix();
+              matrix = matrix.rotate(45 * i);
+              matrix = matrix.translate(R - 20, 0);
+              matrix = matrix.rotate(90);
+              p2d.addPath(P2D, matrix);
+              ctx.stroke(p2d);
+            }
+            ctx.restore();
+          }
+          function draw() {
+            const [w, h] = [
+              (can.width = can.offsetWidth),
+              (can.height = can.offsetHeight),
+            ];
+            ctx.clearRect(0, 0, w, h);
+            ctx.shadowColor = C;
+            ctx.shadowBlur = 10;
+            ctx.strokeStyle = C;
+            ctx.font = "16px serif";
+            ctx.textAlign = "center";
+            ctx.textBaseline = "middle";
+            ctx.fillStyle = C;
+            drawCir(w, h);
+            drawArr(w, h);
+            window.requestIdleCallback(arguments.callee, { timeout: 100 });
+          }
+          draw();
+        });
+      };
+    </script>
+  </head>
+  <body>
+    <div class="sence">
+      <div class="pic"></div>
+      <div class="base">
+        <canvas></canvas>
+        <canvas></canvas>
+        <canvas></canvas>
+        <canvas></canvas>
+        <canvas></canvas>
+        <canvas></canvas>
+        <div class="center">
+          <div class="arm"></div>
+          <div class="arm"></div>
+        </div>
+      </div>
+    </div>
+  </body>
+</html>
